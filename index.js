@@ -12,7 +12,7 @@ const dotenv=require("dotenv");
 const app = express();
 
 dotenv.config();
-app.use(cors({ credentials: true, origin: "https://notes-app-client-weld.vercel.app/" }));
+app.use(cors({ credentials: true, origin: "https://notes-app-client-weld.vercel.app" }));
 app.use(express.json());
 app.use(cookieParser());
 
