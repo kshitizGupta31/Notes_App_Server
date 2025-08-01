@@ -127,7 +127,7 @@ app.get("/profile", verifyToken, async (req, res) => {
   if (!req.user) {
     return res.status(401).json({ error: "Not authenticated" });
   }
-  const userDoc = await User.findById(req.user.id);
+  const userDoc = await User.findById(req.user._id);
   if (!userDoc) {
     return res.status(404).json({ error: "User not found" });
   }
