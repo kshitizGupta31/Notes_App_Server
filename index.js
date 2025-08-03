@@ -53,13 +53,20 @@ const connect = async () => {
 // Middleware to verify token
 const verifyToken = (req, res, next) => {
   const { token } = req.cookies;
+  console.log("Cookies received:", req.cookies);
+  console.log("Token found:", !!token);
+  
   if (!token) {
+    console.log("No token found in cookies");
     return res.status(401).json({ error: "Token is missing" });
   }
+  
   jwt.verify(token, secret, (err, info) => {
     if (err) {
+      console.log("Token verification failed:", err.message);
       return res.status(403).json({ error: "Token is invalid" });
     }
+    console.log("Token verified successfully for user:", info.username);
     req.user = info;
     next();
   });
@@ -88,21 +95,34 @@ app.post("/register", async (req, res) => {
 
 app.post("/login", async (req, res) => {
   const { username, password } = req.body;
+  console.log("Login attempt for username:", username);
+  
   const userDoc = await User.findOne({ username });
   if (!userDoc) {
+    console.log("User not found:", username);
     return res.status(400).json("wrong credentials");
   }
+  
   const passOk = bcrypt.compareSync(password, userDoc.password);
   if (passOk) {
+    console.log("Password verified for user:", username);
     jwt.sign({ username, _id: userDoc._id }, secret, {}, (err, token) => {
       if (err) throw err;
-      res.cookie("token", token).json({
+      console.log("JWT token created for user:", username);
+      res.cookie("token", token, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'none',
+        maxAge: 24 * 60 * 60 * 1000 // 24 hours
+      }).json({
         id: userDoc._id,
         username,
         isAdmin: userDoc.isAdmin,
       });
+      console.log("Login successful for user:", username);
     });
   } else {
+    console.log("Wrong password for user:", username);
     res.status(400).json("wrong credentials");
   }
 });
@@ -157,8 +177,9 @@ app.get("/profile", verifyToken, async (req, res) => {
 
 app.post("/logout", (req, res) => {
   res.clearCookie("token", {
-    sameSite: "none",
+    httpOnly: true,
     secure: true,
+    sameSite: "none",
   });
   res.status(200).json({ message: "Logged out successfully" });
 });
