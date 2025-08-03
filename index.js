@@ -94,7 +94,7 @@ app.post("/login", async (req, res) => {
   }
   const passOk = bcrypt.compareSync(password, userDoc.password);
   if (passOk) {
-    jwt.sign({ username, id: userDoc._id }, secret, {}, (err, token) => {
+    jwt.sign({ username, _id: userDoc._id }, secret, {}, (err, token) => {
       if (err) throw err;
       res.cookie("token", token).json({
         id: userDoc._id,
@@ -133,7 +133,7 @@ app.post("/resources", uploadMiddleware.single("file"), verifyToken, async (req,
       content,
       cover: finalCoverPath,
       website: website,
-      author: req.user.id,
+      author: req.user._id,
     });
 
     console.log("Resource created successfully:", postDoc._id);
