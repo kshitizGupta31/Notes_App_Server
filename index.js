@@ -12,7 +12,28 @@ const dotenv=require("dotenv");
 const app = express();
 
 dotenv.config();
-app.use(cors({ credentials: true, origin: "https://notes-app-client-weld.vercel.app" }));
+
+// CORS configuration to allow multiple origins
+const allowedOrigins = [
+  "https://notes-app-client-weld.vercel.app",
+  "https://notes-app-client-eqdslye1g-kshitizgupta31s-projects.vercel.app",
+  "http://localhost:3000" // For local development
+];
+
+app.use(cors({ 
+  credentials: true, 
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  }
+}));
+
 app.use(express.json());
 app.use(cookieParser());
 
